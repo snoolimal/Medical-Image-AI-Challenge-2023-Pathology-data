@@ -43,8 +43,3 @@ class PatchConverter:
             np.save(str(save_dir / f'{vanila_patch_path.stem}.npy'), rescaled_patch)
 
         pbar.close()
-
-
-PatchConverter = PatchConverter()
-PatchConverter.save_rescaled_patch('train')
-PatchConverter.save_rescaled_patch('test')

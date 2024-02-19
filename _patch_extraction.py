@@ -102,8 +102,3 @@ class PatchExtractor:
                 io.imsave(str(save_dir / f'{slide_path.stem}_{i+1}{slide_path.suffix}'), top_patch)
 
         pbar.close()
-
-
-PatchExtractor = PatchExtractor()
-PatchExtractor.save_patch('train')
-PatchExtractor.save_patch('test')

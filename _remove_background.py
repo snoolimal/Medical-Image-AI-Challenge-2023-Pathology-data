@@ -73,7 +73,3 @@ class BGRemover:
 
             io.imsave(str(save_dir / slide_name), slide_bg_rm)
 
-
-BGRemover = BGRemover()
-BGRemover.save_rmbg_slides('train')
-BGRemover.save_rmbg_slides('test')
