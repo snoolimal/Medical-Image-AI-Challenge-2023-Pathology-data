@@ -1,5 +1,3 @@
-import pickle
-from pathlib import Path
 import warnings
 warnings.filterwarnings(action='ignore')
 
@@ -8,12 +6,7 @@ warnings.filterwarnings(action='ignore')
 seed = 42
 
 
-## Ready
-ready_config = {
-    'train_dir': Path('dataset') / 'train',
-    'test_dir': Path('dataset') / 'test_public'
-}
-
+## Background Removing
 remove_background_config = {
     'split': 30,
     'threshold': 0.8

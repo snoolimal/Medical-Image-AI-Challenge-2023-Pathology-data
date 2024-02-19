@@ -1,4 +1,5 @@
 import numpy as np
+import skimage.io as io
 import cv2
 from pathlib import Path
 from tqdm import tqdm
@@ -59,18 +60,18 @@ class BGRemover:
         save_dir = Path('dataset') / f'{process_type}_bg_rm'
         save_dir.mkdir(parents=True, exist_ok=True)
 
-        # slide_dir = Path('dataset') / f'{process_type}_npy'
-        slide_dir = Path('dataset') / f'{process_type}'
-        slide_paths = sorted([slide_path for slide_path in slide_dir.glob('*.png')])    # '*.npy'
+        # slides_dir = Path('dataset') / f'{process_type}_npy'
+        slides_dir = Path('dataset') / f'{process_type}'
+        slide_paths = sorted([slide_path for slide_path in slides_dir.glob('*.png')])
         pbar = tqdm(slide_paths)
         for slide_path in pbar:
             slide_name = slide_path.name
             pbar.set_description(f'Removing Background | {slide_name}')
 
-            slide = cv2.imread(str(slide_path))                     # np.load(slide)
+            slide = cv2.imread(str(slide_path))
             slide_bg_rm = self.remove_background(slide)
 
-            cv2.imwrite(str(save_dir / slide_name), slide_bg_rm)    # np.save(save_dir / slide_name, slide_bg_rm)
+            io.imsave(str(save_dir / slide_name), slide_bg_rm)
 
 
 BGRemover = BGRemover()

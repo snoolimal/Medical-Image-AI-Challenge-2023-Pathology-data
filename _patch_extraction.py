@@ -99,7 +99,7 @@ class PatchExtractor:
 
             for i in range(min(self.topk, patches.shape[0])):
                 top_patch = patches[i]
-                cv2.imwrite(str(save_dir / f'{slide_path.stem}_{i+1}_{slide_path.suffix}'), top_patch)
+                io.imsave(str(save_dir / f'{slide_path.stem}_{i+1}{slide_path.suffix}'), top_patch)
 
         pbar.close()
 
