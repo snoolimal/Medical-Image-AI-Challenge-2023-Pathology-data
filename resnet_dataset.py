@@ -18,7 +18,7 @@ class ResNetDataset:
         ])
 
         self.metadata = get_patch_metadata(self.process_type)
-        self.metadata = self.metadata[self.metadata['Risk'] == risk]
+        self.metadata = self.metadata.loc[self.metadata['Risk'] == risk, :]
 
     def __getitem__(self, item):
         patch = np.load(self.metadata.loc[item, 'Patch_path'])
