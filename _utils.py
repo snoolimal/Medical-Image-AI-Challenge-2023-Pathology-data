@@ -33,7 +33,7 @@ def png_to_npy(process_type):
         np.save(save_dir / f'{png}.npy', npy)
 
 
-def get_patch_metadata(process_type, save=True):
+def get_patch_metadata(process_type, save=False):
     assert process_type in ['train', 'test'], "Parameter 'process_type' must be either 'train' or 'test'."
 
     patches_dir = Path('dataset') / f'{process_type}_patch_rs'
