@@ -1,8 +1,18 @@
 import numpy as np
 import pandas as pd
+import random
 import skimage.io as io
+import torch
 from pathlib import Path
 from tqdm import tqdm
+
+
+def seed_everything(seed=42):
+    torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 def png_to_npy(process_type):
@@ -45,7 +55,12 @@ def get_patch_metadata(process_type, save=True):
     slide_metadata['Slide_path'] = [str(slide_path) for slide_path in slides_dir.glob('*.png')]
 
     patch_metadata = slide_metadata.merge(patch_metadata)
-    patch_metadata.insert(len(patch_metadata.columns)-1, 'Recurrence', patch_metadata.pop('Recurrence'))
+
+    ## Risk Grouping
+    patch_metadata['Risk'] = patch_metadata['Location'].apply(lambda x: 2 if x in ['heel', 'toe', 'big toe'] else (0 if x in ['finger', 'sole'] else 1))
+
+    if process_type == 'train':
+        patch_metadata.insert(len(patch_metadata.columns)-1, 'Recurrence', patch_metadata.pop('Recurrence'))
 
     if save:
         patch_metadata.to_csv(f'{process_type}_patch_metadata.csv', index=False)

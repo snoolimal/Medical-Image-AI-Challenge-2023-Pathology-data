@@ -94,7 +94,7 @@ class PatchExtractor:
 
         pbar = tqdm(slide_paths, total=len(slide_paths))
         for slide_path in pbar:
-            pbar.set_description(f'Patch Extraction: Slide {slide_path.name}')
+            pbar.set_description(f'Patch Extraction: {slide_path.name}')
             patches = self.extract_patch(slide_path)
 
             for i in range(min(self.topk, patches.shape[0])):
