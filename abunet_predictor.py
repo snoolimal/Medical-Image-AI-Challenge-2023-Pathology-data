@@ -33,8 +33,7 @@ class ABUNetPredictor:
         model.load_state_dict(best_weights)
         model.to(device)
 
-        pred_list = []
-        patch_name_list = []
+        patch_name_list, pred_list = [], []
         for patch_names, patches in tqdm(test_loader, total=len(test_loader), desc='Prediction'):
             patches = patches.to(device)
 
