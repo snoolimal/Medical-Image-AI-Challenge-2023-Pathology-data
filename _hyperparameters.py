@@ -75,3 +75,17 @@ training_config = {
         }
     }
 }
+
+
+## Prediction
+prediction_config = {
+    'resnet': {
+
+    },
+    'abunet': {
+        'device': training_config['abunet']['device'],
+        'batch_size': training_config['abunet']['batch_size'],
+        'model_save_dir': training_config['abunet']['model_save_dir'],
+        'pred_save_dir': Path('predictions')
+    }
+}

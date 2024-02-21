@@ -38,7 +38,7 @@ def png_to_npy(process_type):
         np.save(save_dir / f'{png}.npy', npy)
 
 
-def get_patch_metadata(process_type, save=False):
+def get_patch_metadata(process_type, risk=None, save=False):
     assert process_type in ['train', 'test'], "Parameter 'process_type' must be either 'train' or 'test'."
 
     patches_dir = Path('dataset') / f'{process_type}_patch_rs'
@@ -63,6 +63,8 @@ def get_patch_metadata(process_type, save=False):
 
     ## Risk Grouping
     patch_metadata['Risk'] = patch_metadata['Location'].apply(lambda x: 2 if x in ['heel', 'toe', 'big toe'] else (0 if x in ['finger', 'sole'] else 1))
+    if risk is not None:
+        patch_metadata = patch_metadata[patch_metadata['Risk'] == risk].reset_index(drop=True)
 
     if process_type == 'train':
         patch_metadata.insert(len(patch_metadata.columns)-1, 'Recurrence', patch_metadata.pop('Recurrence'))
@@ -74,9 +76,7 @@ def get_patch_metadata(process_type, save=False):
 
 
 def get_patch_stats(risk=None, save=False):
-    metadata = get_patch_metadata('train')
-    if risk is not None:
-        metadata = metadata[metadata['risk'] == risk]
+    metadata = get_patch_metadata('train', risk)
     patch_path = metadata['Patch_path'].values
 
     patches = [np.load(patch).astype(np.float32) for patch in tqdm(patch_path, desc='Loading Patches for Stats')]
@@ -95,7 +95,7 @@ def get_patch_stats(risk=None, save=False):
         return stats_dict
 
 
-def train_transforms(risk):
+def train_transforms(risk=None):
     stats = get_patch_stats(risk=risk)
 
     return A.Compose([
@@ -111,7 +111,7 @@ def train_transforms(risk):
     ])
 
 
-def test_transforms(risk):
+def test_transforms(risk=None):
     stats = get_patch_stats(risk=risk)
 
     return A.Compose([

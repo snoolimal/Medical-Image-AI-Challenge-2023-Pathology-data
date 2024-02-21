@@ -4,23 +4,24 @@ from _utils import get_patch_metadata
 
 
 class ABUNetDataset(Dataset):
-    def __init__(self, process_type, valid_indices=None, transforms=None):
+    def __init__(self, process_type, risk=None, valid_indices=None, transforms=None):
         assert process_type in ['train', 'test'], "Parameter 'process_type' must be either 'train' or 'test'."
 
         if valid_indices is not None:
-            self.metadata = get_patch_metadata('train')
+            self.metadata = get_patch_metadata('train', risk)
 
             if process_type == 'train':
                 self.metadata = self.metadata.loc[~valid_indices, :].reset_index(drop=True)
             elif process_type == 'test':
                 self.metadata = self.metadata.loc[valid_indices, :].reset_index(drop=True)
         else:
-            self.metadata = get_patch_metadata('test')
+            self.metadata = get_patch_metadata('test', risk)
 
         self.valid_indices = valid_indices
         self.transforms = transforms
 
     def __getitem__(self, item):
+        patch_name = self.metadata.loc[item, 'Patch_name']
         patch_path = self.metadata.loc[item, 'Patch_path']
         patch = np.load(patch_path)
 
@@ -32,7 +33,7 @@ class ABUNetDataset(Dataset):
 
             return patch, label
         else:
-            return patch
+            return patch_name, patch
 
     def __len__(self):
         return len(self.metadata)

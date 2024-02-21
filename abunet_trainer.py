@@ -19,8 +19,7 @@ class ABUNetTrainer:
         self.config = abunet_training_config
 
     def get_valid_indices(self, risk):
-        metadata = get_patch_metadata('train')
-        metadata = metadata[metadata['Risk'] == risk]
+        metadata = get_patch_metadata('train', risk)
         valid_indices = []
         n_splits = self.config['n_splits']
 
@@ -33,7 +32,7 @@ class ABUNetTrainer:
         return valid_indices
 
     @staticmethod
-    def _aggregator(loss_list, label_list, pred_list, epoch, process_type, logging=False):
+    def _aggregate(loss_list, label_list, pred_list, epoch, process_type, logging=False):
         loss = np.mean(loss_list)
         final_preds = torch.sigmoid(torch.cat(pred_list, dim=0)).numpy()
         final_preds = np.where(final_preds > 0.5, 1, 0)
@@ -69,7 +68,7 @@ class ABUNetTrainer:
             label_list.extend(labels.detach().cpu())
             pred_list.append(preds.detach().cpu())
 
-        train_loss, train_score = ABUNetTrainer._aggregator(loss_list, label_list, pred_list, epoch, 'Training')
+        train_loss, train_score = ABUNetTrainer._aggregate(loss_list, label_list, pred_list, epoch, 'Training')
 
         return train_loss, train_score, label_list, pred_list
 
@@ -93,13 +92,32 @@ class ABUNetTrainer:
                 label_list.extend(labels.detach().cpu())
                 pred_list.append(preds.detach().cpu())
 
-        valid_loss, valid_score = ABUNetTrainer._aggregator(loss_list, label_list, pred_list, epoch, 'Validation')
+        valid_loss, valid_score = ABUNetTrainer._aggregate(loss_list, label_list, pred_list, epoch, 'Validation')
 
         return valid_loss, valid_score, label_list, pred_list
 
+    def update(self, epoch, current, best, monitor, model, model_save_dir, patience):
+        sota_updated = False
+        if monitor == 'loss' and current < best:
+            sota_updated = True
+        elif monitor != 'loss' and current > best:
+            sota_updated = True
+
+        if sota_updated:
+            print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
+            best = current
+            best_weights = deepcopy(model.state_dict())
+            torch.save(best_weights, str(model_save_dir / f'risk_{self.risk}_epoch_{epoch:02}.pth'))
+            patience = 0
+        else:
+            patience += 1
+
+        return best, patience
+
     def train_valid(self):
         seed_everything()
-        valid_indices = self.get_valid_indices(self.risk)
+        risk = self.risk
+        valid_indices = self.get_valid_indices(risk)
 
         config = self.config
         device = config['device']
@@ -109,11 +127,13 @@ class ABUNetTrainer:
         monitor = config['monitor']
 
         train_dataset = ABUNetDataset(process_type='train',
+                                      risk=risk,
                                       valid_indices=valid_indices,
-                                      transforms=train_transforms(self.risk))
+                                      transforms=train_transforms(risk))
         valid_dataset = ABUNetDataset(process_type='test',
+                                      risk=risk,
                                       valid_indices=valid_indices,
-                                      transforms=test_transforms(self.risk))
+                                      transforms=test_transforms(risk))
         train_loader = DataLoader(train_dataset,
                                   batch_size=config['batch_size'],
                                   shuffle=True)
@@ -128,7 +148,6 @@ class ABUNetTrainer:
         scheduler = set_abunet_scheduler(optimizer)
 
         best_performance = np.inf if monitor == 'loss' else 0.
-        best_weights = deepcopy(model.state_dict())
         patience = 0
         for epoch in range(1, num_epochs+1):
             print(f'Now on Epoch {epoch}/{num_epochs}')
@@ -137,29 +156,14 @@ class ABUNetTrainer:
             valid_loss, valid_score, batch_label, batch_pred = ABUNetTrainer._valid(valid_loader, model, criterion, device, epoch)
             scheduler.step(valid_loss if monitor == 'loss' else valid_score)
 
-            ABUNetTrainer._aggregator(train_loss, train_score, batch_label, epoch, 'Training', logging=True)
-            ABUNetTrainer._aggregator(valid_loss, valid_score, batch_label, epoch, 'Validation', logging=True)
+            ABUNetTrainer._aggregate(train_loss, train_score, batch_label, epoch, 'Training', logging=True)
+            ABUNetTrainer._aggregate(valid_loss, valid_score, batch_label, epoch, 'Validation', logging=True)
 
             if monitor == 'loss':
-                if valid_loss < best_performance:
-                    print(f'Sota updated on epoch {epoch}, best loss {best_performance:.5f} -> {valid_loss:.5f}')
-                    best_performance = valid_loss
-                    best_weights = deepcopy(model.state_dict())
-
-                    patience = 0
-                else:
-                    patience += 1
+                best_performance, patience = self.update(epoch, valid_loss, best_performance, 'loss', model, model_save_dir, patience)
             else:
-                if valid_score > best_performance:
-                    print(f'Sota updated on epoch {epoch}, best score {best_performance:.5f} -> {valid_score:.5f}')
-                    best_performance = valid_score
-                    best_weights = deepcopy(model.state_dict())
+                best_performance, patience = self.update(epoch, valid_score, best_performance, 'score', model, model_save_dir, patience)
 
-                    patience = 0
-                else:
-                    patience += 1
-
-            torch.save(best_weights, str(model_save_dir / f'epoch_{epoch:02}.pth'))
             if patience == config['early_stopping_rounds']:
                 print(f'Early stopping triggered on epoch {epoch-patience}.')
 
