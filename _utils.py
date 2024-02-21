@@ -73,9 +73,11 @@ def get_patch_metadata(process_type, save=False):
         return patch_metadata
 
 
-def get_patch_stats(save=False):
-    patch_dir = Path('dataset/train_patch_rs')
-    patch_path = [pp for pp in patch_dir.glob('*.npy')]
+def get_patch_stats(risk=None, save=False):
+    metadata = get_patch_metadata('train')
+    if risk is not None:
+        metadata = metadata[metadata['risk'] == risk]
+    patch_path = metadata['Patch_path'].values
 
     patches = [np.load(patch).astype(np.float32) for patch in tqdm(patch_path, desc='Loading Patches for Stats')]
 

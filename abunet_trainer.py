@@ -14,11 +14,13 @@ from _hyperparameters import training_config
 
 
 class ABUNetTrainer:
-    def __init__(self, abunet_training_config=training_config['abunet']):
+    def __init__(self, risk=None, abunet_training_config=training_config['abunet']):
+        self.risk = risk
         self.config = abunet_training_config
 
     def get_valid_indices(self):
         metadata = get_patch_metadata('train')
+        metadata = metadata[metadata['Risk'] == self.risk]
         valid_indices = []
         n_splits = self.config['n_splits']
 
@@ -79,7 +81,7 @@ class ABUNetTrainer:
         loss_list, label_list, pred_list = [], [], []
         pbar = tqdm(valid_loader, total=len(valid_loader), leave=False)
         for patches, labels in pbar:
-            pbar.set_description('Training')
+            pbar.set_description('Validation')
 
             patches, labels = patches.to(device), labels.to(device)
 
