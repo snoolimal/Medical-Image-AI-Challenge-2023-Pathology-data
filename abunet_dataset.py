@@ -4,14 +4,11 @@ from _utils import get_patch_metadata
 
 
 class ABUNetDataset(Dataset):
-    def __init__(self, process_type, valid_indices=None, cutoff=None, transforms=None):
+    def __init__(self, process_type, valid_indices=None, transforms=None):
         assert process_type in ['train', 'test'], "Parameter 'process_type' must be either 'train' or 'test'."
 
         if valid_indices is not None:
             self.metadata = get_patch_metadata('train')
-
-            if cutoff is not None:
-                self.metadata = self.metadata[self.metadata['Patch_rank'] <= cutoff].reset_index(drop=True)
 
             if process_type == 'train':
                 self.metadata = self.metadata.loc[~valid_indices, :].reset_index(drop=True)

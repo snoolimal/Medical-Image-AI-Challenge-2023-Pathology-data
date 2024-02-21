@@ -18,9 +18,9 @@ class ABUNetTrainer:
         self.risk = risk
         self.config = abunet_training_config
 
-    def get_valid_indices(self):
+    def get_valid_indices(self, risk):
         metadata = get_patch_metadata('train')
-        metadata = metadata[metadata['Risk'] == self.risk]
+        metadata = metadata[metadata['Risk'] == risk]
         valid_indices = []
         n_splits = self.config['n_splits']
 
@@ -99,7 +99,7 @@ class ABUNetTrainer:
 
     def train_valid(self):
         seed_everything()
-        valid_indices = self.get_valid_indices()
+        valid_indices = self.get_valid_indices(self.risk)
 
         config = self.config
         device = config['device']
