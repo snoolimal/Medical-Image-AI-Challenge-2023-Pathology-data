@@ -9,7 +9,7 @@ from _hyperparameters import prediction_config
 
 
 class ABUNetPredictor:
-    def __init__(self, risk, abunet_prediction_config=prediction_config['abunet']):
+    def __init__(self, risk=None, abunet_prediction_config=prediction_config['abunet']):
         self.risk = risk
         self.config = abunet_prediction_config
 
@@ -17,10 +17,14 @@ class ABUNetPredictor:
         config = self.config
         risk = self.risk
         device = config['device']
-        model_save_dir = config['model_save_dir'] / risk
-        best_weights = [w for w in model_save_dir.glob('*.pth')][-1]
-        pred_save_dir = config['pred_save_dir'] / risk
+        if risk is not None:
+            model_save_dir = config['model_save_dir'] / f'risk_{risk}'
+            pred_save_dir = config['pred_save_dir'] / f'risk_{risk}'
+        else:
+            model_save_dir = config['model_save_dir'] / 'all'
+            pred_save_dir = config['pred_save_dir'] / 'all'
         pred_save_dir.mkdir(parents=True, exist_ok=True)
+        best_weights = [w for w in model_save_dir.glob('*.pth')][-1]
 
         test_dataset = ABUNetDataset(process_type='test',
                                      risk=risk,
@@ -45,4 +49,4 @@ class ABUNetPredictor:
             patch_name_list.extend(patch_names)
 
         pred_df = pd.DataFrame({'Patch_name': patch_name_list, 'Risk': risk, 'Proba': pred_list})
-        pred_df.to_csv(str(pred_save_dir), f'risk_{risk}_abunet.csv', index=False)
+        pred_df.to_csv(str(pred_save_dir / 'abunet.csv'), index=False)

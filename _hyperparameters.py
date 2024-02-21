@@ -30,7 +30,9 @@ patch_extraction_config = {
 ## Model
 model_config = {
     'resnet': {
-
+        'model_name': 'resnet101',
+        'pretrained': True,
+        'transfer': True
     },
     'abunet': {
         'unet': {
@@ -54,15 +56,18 @@ model_config = {
 ## Training
 training_config = {
     'resnet': {
+        'device': 'cuda' if torch.cuda.is_available() else 'cpu',
+        'model_save_dir': Path('models/resnet'),
         'num_epochs': 30,
         'lr': 1e-3,
         'batch_size': 64,
-        'early_stopping_rounds': 10
+        'monitor': 'score',
+        'early_stopping_rounds': 10,
     },
     'abunet': {
         'n_splits': 2,
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
-        'model_save_dir': Path('models'),
+        'model_save_dir': Path('models/abunet'),
         'num_epochs': 10,
         'batch_size': 32,
         'lr': 1e-4,
@@ -80,12 +85,15 @@ training_config = {
 ## Prediction
 prediction_config = {
     'resnet': {
-
+        'device': training_config['resnet']['device'],
+        'batch_size': training_config['resnet']['batch_size'],
+        'model_save_dir': training_config['resnet']['model_save_dir'],
+        'pred_save_dir': Path('predictions/resnet')
     },
     'abunet': {
         'device': training_config['abunet']['device'],
         'batch_size': training_config['abunet']['batch_size'],
         'model_save_dir': training_config['abunet']['model_save_dir'],
-        'pred_save_dir': Path('predictions')
+        'pred_save_dir': Path('predictions/abunet')
     }
 }

@@ -9,9 +9,7 @@ class ResNetDataset:
         assert process_type in ['train', 'test'], "Parameter 'process_type' must be either 'train' or 'test'."
 
         self.process_type = process_type
-
-        self.metadata = get_patch_metadata(self.process_type)
-        self.metadata = self.metadata.loc[self.metadata['Risk'] == risk, :]
+        self.metadata = get_patch_metadata(self.process_type, risk)
 
         self.transforms = transforms.Compose([
             transforms.ToTensor()

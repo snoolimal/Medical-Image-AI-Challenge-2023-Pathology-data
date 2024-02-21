@@ -5,6 +5,7 @@ from abunet_predictor import ABUNetPredictor
 
 def abunet_main():
     seed_everything()
+
     for risk in [1, 2]:
         Trainer = ABUNetTrainer(risk=risk)
         Predictor = ABUNetPredictor(risk=risk)

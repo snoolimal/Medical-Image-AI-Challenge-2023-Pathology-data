@@ -109,7 +109,7 @@ class ABUNetTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir / f'risk_{risk}_epoch_{epoch:02}.pth'))
+            torch.save(best_weights, str(model_save_dir / f'epoch_{epoch:02}.pth'))
             patience = 0
         else:
             patience += 1
@@ -122,10 +122,13 @@ class ABUNetTrainer:
 
         config = self.config
         device = config['device']
-        model_save_dir = config['model_save_dir'] / 'risk'
-        model_save_dir.mkdir(parents=True, exist_ok=True)
         num_epochs = config['num_epochs']
         monitor = config['monitor']
+        if risk is not None:
+            model_save_dir = config['model_save_dir'] / f'risk_{risk}'
+        else:
+            model_save_dir = config['model_save_dir'] / 'all'
+        model_save_dir.mkdir(parents=True, exist_ok=True)
 
         train_dataset = ABUNetDataset(process_type='train',
                                       risk=risk,
