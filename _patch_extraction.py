@@ -4,14 +4,14 @@ import skimage.io as io
 import cv2
 from pathlib import Path
 from tqdm import tqdm
-from _hyperparameters import patch_extract_config
+from _hyperparameters import patch_extraction_config
 
 
 class PatchExtractor:
-    def __init__(self, patch_extract_config=patch_extract_config):
-        self.patch_size = patch_extract_config['patch_size']
-        self.stride = patch_extract_config['stride']
-        self.topk = patch_extract_config['topk']
+    def __init__(self, patch_extraction_config=patch_extraction_config):
+        self.patch_size = patch_extraction_config['patch_size']
+        self.stride = patch_extraction_config['stride']
+        self.topk = patch_extraction_config['topk']
 
     @staticmethod
     def _read_slide(slide_path):

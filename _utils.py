@@ -1,13 +1,18 @@
+import random
 import numpy as np
 import pandas as pd
-import random
 import skimage.io as io
 import torch
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 from pathlib import Path
+import pickle
 from tqdm import tqdm
+from _hyperparameters import SEED, removing_background_config, patch_extraction_config, model_config, training_config
 
 
-def seed_everything(seed=42):
+def seed_everything(seed=SEED):
     torch.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
@@ -66,3 +71,76 @@ def get_patch_metadata(process_type, save=False):
         patch_metadata.to_csv(f'{process_type}_patch_metadata.csv', index=False)
     else:
         return patch_metadata
+
+
+def get_patch_stats(save=False):
+    patch_dir = Path('dataset/train_patch_rs')
+    patch_path = [pp for pp in patch_dir.glob('*.npy')]
+
+    patches = [np.load(patch).astype(np.float32) for patch in tqdm(patch_path, desc='Loading Patches for Stats')]
+
+    normalized_mean = np.mean(patches, axis=(0, 1, 2))
+    normalized_mean = tuple(normalized_mean.round(3))
+    normalized_std = np.std(patches, axis=(0, 1, 2))
+    normalized_std = tuple(normalized_std.round(3))
+
+    stats_dict = {'mean': normalized_mean, 'std': normalized_std}
+
+    if save:
+        with open('normalized_stats.pkl', 'wb') as f:
+            pickle.dump(stats_dict, f)
+    else:
+        return stats_dict
+
+
+def train_transforms():
+    stats = get_patch_stats()
+
+    return A.Compose([
+        # A.Transpose(p=0.5),
+        # A.HorizontalFlip(p=0.5),
+        # A.VerticalFlip(p=0.5),
+        # A.RandomRotate90(p=0.25),
+        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.5, p=0.5),
+        # A.HueSaturationValue(sat_shift_limit=20, val_shift_limit=0, p=0.5),
+        # A.ChannelShuffle(p=0.5),
+        A.Normalize(mean=stats['mean'], std=stats['std']),
+        ToTensorV2()
+    ])
+
+
+def test_transforms():
+    stats = get_patch_stats()
+
+    return A.Compose([
+        A.Normalize(mean=stats['mean'], std=stats['std']),
+        ToTensorV2()
+    ])
+
+
+def set_abunet_scheduler(optimizer, abunet_training_config=training_config['abunet']):
+    config = abunet_training_config['scheduler']
+
+    mode = 'min' if abunet_training_config['monitor'] == 'loss' else 'max'
+    patience = abunet_training_config['early_stopping_rounds'] - 1
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        mode=mode,
+        factor=config['factor'],
+        patience=patience,
+        min_lr=config['min_lr'],
+        verbose=config['verbose']
+    )
+
+    return scheduler
+
+
+def get_all_config():
+    config = {
+        'remove_background_config': removing_background_config,
+        'patch_extract_config': patch_extraction_config,
+        'model_config': model_config,
+        'training_config': training_config,
+    }
+
+    return config

@@ -3,13 +3,13 @@ import skimage.io as io
 import cv2
 from pathlib import Path
 from tqdm import tqdm
-from _hyperparameters import remove_background_config
+from _hyperparameters import removing_background_config
 
 
 class BGRemover:
-    def __init__(self, remove_background_config=remove_background_config):
-        self.split = remove_background_config['split']
-        self.threshold = remove_background_config['threshold']
+    def __init__(self, removing_background_config=removing_background_config):
+        self.split = removing_background_config['split']
+        self.threshold = removing_background_config['threshold']
 
     @staticmethod
     def get_blue(slide):
