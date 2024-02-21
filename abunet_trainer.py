@@ -110,10 +110,10 @@ class ABUNetTrainer:
 
         train_dataset = ABUNetDataset(process_type='train',
                                       valid_indices=valid_indices,
-                                      transforms=train_transforms())
+                                      transforms=train_transforms(self.risk))
         valid_dataset = ABUNetDataset(process_type='test',
                                       valid_indices=valid_indices,
-                                      transforms=test_transforms())
+                                      transforms=test_transforms(self.risk))
         train_loader = DataLoader(train_dataset,
                                   batch_size=config['batch_size'],
                                   shuffle=True)

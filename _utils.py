@@ -95,8 +95,8 @@ def get_patch_stats(risk=None, save=False):
         return stats_dict
 
 
-def train_transforms():
-    stats = get_patch_stats()
+def train_transforms(risk):
+    stats = get_patch_stats(risk=risk)
 
     return A.Compose([
         # A.Transpose(p=0.5),
@@ -111,8 +111,8 @@ def train_transforms():
     ])
 
 
-def test_transforms():
-    stats = get_patch_stats()
+def test_transforms(risk):
+    stats = get_patch_stats(risk=risk)
 
     return A.Compose([
         A.Normalize(mean=stats['mean'], std=stats['std']),
