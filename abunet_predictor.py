@@ -17,9 +17,9 @@ class ABUNetPredictor:
         config = self.config
         risk = self.risk
         device = config['device']
-        model_save_dir = config['model_save_dir']
-        best_weights = model_save_dir.glob('*.pth')
-        pred_save_dir = config['pred_save_dir']
+        model_save_dir = config['model_save_dir'] / risk
+        best_weights = [w for w in model_save_dir.glob('*.pth')][-1]
+        pred_save_dir = config['pred_save_dir'] / risk
         pred_save_dir.mkdir(parents=True, exist_ok=True)
 
         test_dataset = ABUNetDataset(process_type='test',

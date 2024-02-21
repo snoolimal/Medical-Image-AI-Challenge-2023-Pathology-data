@@ -9,7 +9,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from abunet_dataset import ABUNetDataset
 from abunet_model import ABUNet
-from _utils import seed_everything, get_patch_metadata, train_transforms, test_transforms, set_abunet_scheduler
+from _utils import get_patch_metadata, train_transforms, test_transforms, set_abunet_scheduler
 from _hyperparameters import training_config
 
 
@@ -97,6 +97,8 @@ class ABUNetTrainer:
         return valid_loss, valid_score, label_list, pred_list
 
     def update(self, epoch, current, best, monitor, model, model_save_dir, patience):
+        risk = self.risk
+
         sota_updated = False
         if monitor == 'loss' and current < best:
             sota_updated = True
@@ -107,7 +109,7 @@ class ABUNetTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir / f'risk_{self.risk}_epoch_{epoch:02}.pth'))
+            torch.save(best_weights, str(model_save_dir / f'risk_{risk}_epoch_{epoch:02}.pth'))
             patience = 0
         else:
             patience += 1
@@ -115,13 +117,12 @@ class ABUNetTrainer:
         return best, patience
 
     def train_valid(self):
-        seed_everything()
         risk = self.risk
         valid_indices = self.get_valid_indices(risk)
 
         config = self.config
         device = config['device']
-        model_save_dir = config['model_save_dir']
+        model_save_dir = config['model_save_dir'] / 'risk'
         model_save_dir.mkdir(parents=True, exist_ok=True)
         num_epochs = config['num_epochs']
         monitor = config['monitor']
