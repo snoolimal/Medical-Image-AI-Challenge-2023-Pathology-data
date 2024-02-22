@@ -49,4 +49,4 @@ class ABUNetPredictor:
             patch_name_list.extend(patch_names)
 
         pred_df = pd.DataFrame({'Patch_name': patch_name_list, 'Risk': risk, 'Proba': pred_list})
-        pred_df.to_csv(str(pred_save_dir / 'abunet.csv'), index=False)
+        pred_df.to_csv(str(pred_save_dir / f'abunet_{risk}.csv'), index=False)

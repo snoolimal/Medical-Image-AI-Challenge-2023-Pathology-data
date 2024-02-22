@@ -54,7 +54,7 @@ class ABUNetTrainer:
         loss_list, label_list, pred_list = [], [], []
         pbar = tqdm(train_loader, total=len(train_loader), leave=False)
         for patches, labels in pbar:
-            pbar.set_description('Training')
+            pbar.set_description('Training Atteition-Based UNet+ViT')
 
             patches, labels = patches.to(device), labels.to(device)
 
@@ -80,7 +80,7 @@ class ABUNetTrainer:
         loss_list, label_list, pred_list = [], [], []
         pbar = tqdm(valid_loader, total=len(valid_loader), leave=False)
         for patches, labels in pbar:
-            pbar.set_description('Validation')
+            pbar.set_description('Validating Attention-Based UNet+ViT')
 
             patches, labels = patches.to(device), labels.to(device)
 
@@ -96,9 +96,8 @@ class ABUNetTrainer:
 
         return valid_loss, valid_score, label_list, pred_list
 
-    def update(self, epoch, current, best, monitor, model, model_save_dir, patience):
-        risk = self.risk
-
+    @staticmethod
+    def _update(epoch, current, best, monitor, model, model_save_dir, patience):
         sota_updated = False
         if monitor == 'loss' and current < best:
             sota_updated = True
@@ -164,13 +163,11 @@ class ABUNetTrainer:
             ABUNetTrainer._aggregate(valid_loss, valid_score, batch_label, epoch, 'Validation', logging=True)
 
             if monitor == 'loss':
-                best_performance, patience = self.update(epoch, valid_loss, best_performance, 'loss', model, model_save_dir, patience)
+                best_performance, patience = ABUNetTrainer._update(epoch, valid_loss, best_performance, 'loss', model, model_save_dir, patience)
             else:
-                best_performance, patience = self.update(epoch, valid_score, best_performance, 'score', model, model_save_dir, patience)
+                best_performance, patience = ABUNetTrainer._update(epoch, valid_score, best_performance, 'score', model, model_save_dir, patience)
 
             if patience == config['early_stopping_rounds']:
                 print(f'Early stopping triggered on epoch {epoch-patience}.')
 
                 break
-
-

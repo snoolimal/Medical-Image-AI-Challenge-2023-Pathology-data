@@ -1,3 +1,4 @@
+import os
 import random
 import numpy as np
 import pandas as pd
@@ -9,15 +10,17 @@ from albumentations.pytorch.transforms import ToTensorV2
 from pathlib import Path
 import pickle
 from tqdm import tqdm
-from _hyperparameters import SEED, removing_background_config, patch_extraction_config, model_config, training_config
+from _hyperparameters import SEED, removing_background_config, patch_extraction_config, model_config, training_config, prediction_config
 
 
-def seed_everything(seed=SEED):
-    torch.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    np.random.seed(seed)
+def seed_everything(seed: int = SEED):
     random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
 
 
 def png_to_npy(process_type):
@@ -143,6 +146,7 @@ def get_all_config():
         'patch_extract_config': patch_extraction_config,
         'model_config': model_config,
         'training_config': training_config,
+        'prediction_config': prediction_config
     }
 
     return config

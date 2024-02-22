@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from pathlib import Path
 import warnings
@@ -26,6 +27,7 @@ patch_extraction_config = {
     'tissue_area_ratio': 0.1,
     'topk': TOPK
 }
+
 
 ## Model
 model_config = {
@@ -63,6 +65,16 @@ training_config = {
         'batch_size': 64,
         'monitor': 'score',
         'early_stopping_rounds': 10,
+        'num_channels': {
+            0: '24',
+            1: '12',
+            2: '24'
+        },
+        'aggregation': {
+            0: lambda x: x.median(axis=1),
+            1: lambda x: x.max(axis=1),
+            2: lambda x: x.mean(axis=1)
+        }
     },
     'abunet': {
         'n_splits': 2,

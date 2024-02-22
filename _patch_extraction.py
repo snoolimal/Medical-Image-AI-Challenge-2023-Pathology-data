@@ -9,9 +9,10 @@ from _hyperparameters import patch_extraction_config
 
 class PatchExtractor:
     def __init__(self, patch_extraction_config=patch_extraction_config):
-        self.patch_size = patch_extraction_config['patch_size']
-        self.stride = patch_extraction_config['stride']
-        self.topk = patch_extraction_config['topk']
+        config = patch_extraction_config
+        self.patch_size = config['patch_size']
+        self.stride = config['stride']
+        self.topk = config['topk']
 
     @staticmethod
     def _read_slide(slide_path):
@@ -64,7 +65,7 @@ class PatchExtractor:
 
         patches = []
         scores = []
-        w_pinned, h_pinned = [], []
+        # w_pinned, h_pinned = [], []
         for h in h_markers:
             for w in w_markers:
                 patch = masked_slide[h:h+patch_size, w:w+patch_size, :]
@@ -72,8 +73,8 @@ class PatchExtractor:
 
                 patches.append(patch)
                 scores.append(score)
-                w_pinned.append(h)
-                w_pinned.append(w)
+                # w_pinned.append(h)
+                # w_pinned.append(w)
 
         patches = np.array(patches)
         topk_scores = np.argsort(-np.array(scores))[:self.topk]
