@@ -70,3 +70,5 @@ class BGRemover:
             bg_rm_slide = self.by_remove_background(bg_rm_slide, 'horizontal')
 
             io.imsave(str(save_dir / slide_name), bg_rm_slide)
+
+        pbar.close()
