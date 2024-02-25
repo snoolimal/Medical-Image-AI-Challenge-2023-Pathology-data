@@ -1,6 +1,8 @@
 from preprocessing.removing_background import BGRemover
 from preprocessing.patch_extraction import PatchExtractor
 from preprocessing.patch_conversion import PatchConverter
+from resnet.trainer import RNTrainer
+from unetvit.trainer import UVTrainer
 
 
 def main(preprocessing=False):
@@ -16,6 +18,14 @@ def main(preprocessing=False):
         patch_converter = PatchConverter()
         patch_converter.rescale_save_patch('train')
         patch_converter.rescale_save_patch('test')
+
+    for risk in [0, 1, 2]:
+        resnet_trainer = RNTrainer(risk)
+        resnet_trainer.train_valid()
+
+    for risk in [1, 2]:
+        uv_trainer = UVTrainer(risk)
+        uv_trainer.train_valid()
 
 
 if __name__ == '__main__':

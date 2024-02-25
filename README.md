@@ -9,15 +9,19 @@ Vault
 │   ├── patch_extraction.py
 │   └── removing_background.py
 ├── resnet
-│   ├── resnet_dataset.py
-│   ├── resnet_model.py
-│   ├── resnet_predictor.py
-│   └── resnet_trainer.py
+│   ├── predictions
+│   ├── weights
+│   ├── dataset.py
+│   ├── model.py
+│   ├── predictor.py
+│   └── trainer.py
 ├── unetvit
-│   ├── unetvit_dataset.py
-│   ├── unetvit_model.py
-│   ├── unetvit_predictor.py
-│   └── unetvit_trainer.py
+│   ├── predictions
+│   ├── weights
+│   ├── dataset.py
+│   ├── model.py
+│   ├── predictor.py
+│   └── trainer.py
 ├── utils
 │   ├── config.py
 │   └── utils.py
