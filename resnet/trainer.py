@@ -93,7 +93,7 @@ class RNTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir) + f'_epoch_{epoch:02}.pth')
+            torch.save(best_weights, str(model_save_dir)+f'_epoch_{epoch:02}.pth')
             patience = 0
         else:
             patience += 1
@@ -104,6 +104,7 @@ class RNTrainer:
         risk = self.risk
         config = self.config
         device = config['device']
+        num_channels = config['num_channels'][risk]
 
         if risk is not None:
             model_save_dir = config['model_save_dir'] / f'risk_{risk}'
@@ -122,7 +123,7 @@ class RNTrainer:
                                   batch_size=config['batch_size'],
                                   shuffle=False)
 
-        model = ResNet(num_channels=config['num_channels'][risk])
+        model = ResNet(num_channels=num_channels)
         model.to(device)
         criterion = nn.BCELoss()
         optimizer = optim.Adam(model.parameters(), lr=config['lr'])

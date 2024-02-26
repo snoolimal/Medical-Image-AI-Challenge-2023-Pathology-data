@@ -83,11 +83,11 @@ class UVTrainer:
     @staticmethod
     def _aggregate(loss_list, label_list, pred_list, epoch, mode, logging=False):
         loss = np.mean(loss_list)
-        final_preds = np.where(torch.sigmoid(torch.cat(pred_list, dim=0)).numpy() > 0.5, 1, 0)
-        n_pos = np.sum(final_preds == 1)
+        pred_final = np.where(torch.sigmoid(torch.cat(pred_list, dim=0)).numpy() > 0.5, 1, 0)
+        n_pos = np.sum(pred_final == 1)
 
-        acc = accuracy_score(y_true=label_list, y_pred=final_preds)
-        score = roc_auc_score(y_true=label_list, y_score=final_preds)
+        acc = accuracy_score(y_true=label_list, y_pred=pred_final)
+        score = roc_auc_score(y_true=label_list, y_score=pred_final)
 
         if logging:
             print(f'Epoch {epoch} {mode} | Loss: {loss:.5f}, Acc: {acc:.5f}, AUROC: {score:.5f}, #Pos: {100*n_pos/len(loss_list)}%')
@@ -106,7 +106,7 @@ class UVTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir) + f'_epoch_{epoch:02}.pth')
+            torch.save(best_weights, str(model_save_dir)+f'_epoch_{epoch:02}.pth')
             patience = 0
         else:
             patience += 1

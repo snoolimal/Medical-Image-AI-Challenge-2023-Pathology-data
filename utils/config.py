@@ -78,3 +78,26 @@ training_config = {
         }
     }
 }
+
+
+prediction_config = {
+    'resnet': {
+        'model_save_dir': training_config['resnet']['model_save_dir'],
+        'prediction_save_dir': Path('resnet') / 'predictions',
+        'device': 'cuda' if torch.cuda.is_available() else 'cpu',
+        'batch_size': training_config['resnet']['batch_size'],
+        'num_channels': training_config['resnet']['num_channels'],
+        'aggregation': {
+            0: lambda x: x.median(axis=1),
+            1: lambda x: x.max(axis=1),
+            2: lambda x: x.mean(axis=1),
+            None: lambda x: x.mean(axis=1),
+        }
+    },
+    'unetvit': {
+        'model_save_dir': training_config['unetvit']['model_save_dir'],
+        'prediction_save_dir': Path('unetvit') / 'predictions',
+        'device': 'cuda' if torch.cuda.is_available() else 'cpu',
+        'batch_size': training_config['unetvit']['batch_size'],
+    }
+}
