@@ -8,7 +8,7 @@ from utils.utils import test_transforms
 from utils.config import prediction_config
 
 
-class UVTrainer:
+class UVPredictor:
     def __init__(self, risk=None, config=prediction_config['unetvit']):
         self.risk = risk
         self.config = config

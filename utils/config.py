@@ -50,7 +50,7 @@ training_config = {
     'resnet': {
         'model_save_dir': Path('resnet') / 'weights',
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
-        'num_epochs': 30,
+        'num_epochs': 2,
         'batch_size': 64,
         'lr': 1e-3,
         'monitor': 'score',
@@ -66,7 +66,7 @@ training_config = {
         'n_splits': 2,
         'model_save_dir': Path('unetvit') / 'weights',
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
-        'num_epochs': 10,
+        'num_epochs': 2,
         'batch_size': 32,
         'lr': 1e-4,
         'monitor': 'score',
