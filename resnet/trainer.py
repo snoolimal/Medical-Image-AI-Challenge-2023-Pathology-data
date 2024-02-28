@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, average_precision_score
 import torch
 import torch.nn as nn
@@ -8,13 +9,21 @@ from copy import deepcopy
 from tqdm import tqdm
 from resnet.dataset import RNDataset
 from resnet.model import ResNet
-from utils.config import training_config
+from utils.utils import get_patch_metadata
+from utils.config import SEED, training_config
 
 
 class RNTrainer:
     def __init__(self, risk=None, config=training_config['resnet']):
         self.risk = risk
         self.config = config
+
+    def get_valid_indices(self):
+        metadata = get_patch_metadata('train', self.risk)
+        valid_size = self.config['valid_size']
+        _, valid_df = train_test_split(metadata, test_size=valid_size, stratify=metadata['Recurrence'], random_state=SEED)
+
+        return valid_df.index
 
     @staticmethod
     def _train(train_loader, model, criterion, optimizer, device):
@@ -29,8 +38,8 @@ class RNTrainer:
             patches, labels = patches.to(device), labels.to(device)
 
             optimizer.zero_grad()
-            outputs = model(patches)
-            loss = criterion(outputs, labels.float())
+            outputs = model(patches).squeeze()
+            loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
@@ -42,14 +51,14 @@ class RNTrainer:
         model.eval()
 
         running_performance = np.zeros(shape=(4,), dtype=np.float32)
-        pbar = tqdm(enumerate(valid_loader), total=len(valid_loader), leave=False)
-        for i, (patches, labels) in pbar:
+        pbar = tqdm(valid_loader, total=len(valid_loader), leave=False)
+        for patches, labels in pbar:
             pbar.set_description('ResNet101 MIL | Validation')
 
             patches = patches.to(device)
 
             with torch.no_grad():
-                outputs = model(patches)
+                outputs = model(patches).squeeze()
                 batch_pred = (outputs > 0.5).cpu().numpy()
                 batch_label = labels.float().numpy()
 
@@ -82,7 +91,7 @@ class RNTrainer:
         return total_loss, total_acc, total_auroc, total_auprc
 
     @staticmethod
-    def _update(epoch, current, best, monitor, model, model_save_dir, patience):
+    def _update(epoch, current, best, monitor, model, model_save_dir, patience, risk=None):
         sota_updated = False
         if monitor == 'loss' and current < best:
             sota_updated = True
@@ -93,7 +102,8 @@ class RNTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir)+f'_epoch_{epoch:02}.pth')
+            best_name = f'risk_{risk}_epoch_{epoch:02}.pth'
+            torch.save(best_weights, str(model_save_dir / best_name))
             patience = 0
         else:
             patience += 1
@@ -103,19 +113,20 @@ class RNTrainer:
     def train_valid(self):
         risk = self.risk
         config = self.config
+        augmentations = config['augmentations']
         device = config['device']
         num_channels = config['num_channels'][risk]
-
-        if risk is not None:
-            model_save_dir = config['model_save_dir'] / f'risk_{risk}'
-        else:
-            model_save_dir = config['model_save_dir'] / 'all'
+        model_save_dir = config['model_save_dir']
         model_save_dir.mkdir(parents=True, exist_ok=True)
+        valid_indices = self.get_valid_indices()
 
         train_dataset = RNDataset(risk=risk,
-                                  mode='train')
+                                  mode='train',
+                                  valid_indices=valid_indices,
+                                  augmentations=augmentations)
         valid_dataset = RNDataset(risk=risk,
-                                  mode='test')
+                                  mode='test',
+                                  valid_indices=valid_indices)
         train_loader = DataLoader(train_dataset,
                                   batch_size=config['batch_size'],
                                   shuffle=True)
@@ -138,9 +149,9 @@ class RNTrainer:
             valid_loss, _, valid_score, _ = RNTrainer._aggregate(running_performance, len(valid_loader), epoch, 'Validation', logging=False)
 
             if config['monitor'] == 'loss':
-                best_performance, patience = RNTrainer._update(epoch, valid_loss, best_performance, 'loss', model, model_save_dir, patience)
+                best_performance, patience = RNTrainer._update(epoch, valid_loss, best_performance, 'loss', model, model_save_dir, patience, risk)
             else:
-                best_performance, patience = RNTrainer._update(epoch, valid_score, best_performance, 'score', model, model_save_dir, patience)
+                best_performance, patience = RNTrainer._update(epoch, valid_score, best_performance, 'score', model, model_save_dir, patience, risk)
 
             if patience == config['early_stopping_rounds']:
                 print(f'Early stopping triggered on epoch {epoch-patience}.')

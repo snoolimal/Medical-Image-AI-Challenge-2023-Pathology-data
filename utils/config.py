@@ -1,7 +1,11 @@
 import torch
+from torchvision.transforms import transforms
 from pathlib import Path
 import warnings
 warnings.filterwarnings(action='ignore')
+
+
+SEED = 42
 
 
 removing_background_config = {
@@ -48,6 +52,11 @@ model_config = {
 
 training_config = {
     'resnet': {
+        'augmentations': transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip()
+        ]),
+        'valid_size': 0.1,
         'model_save_dir': Path('resnet') / 'weights',
         'device': 'cuda' if torch.cuda.is_available() else 'cpu',
         'num_epochs': 2,
@@ -56,10 +65,10 @@ training_config = {
         'monitor': 'score',
         'early_stoppping_rounds': 5,
         'num_channels': {
-            0: '24',
-            1: '12',
-            2: '24',
-            None: '36'
+            0: 24,
+            1: 12,
+            2: 24,
+            None: 36
         }
     },
     'unetvit': {

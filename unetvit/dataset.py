@@ -21,7 +21,7 @@ class UVDataset(Dataset):
         self.transforms = transforms
 
     def __getitem__(self, item):
-        slide_name = self.metadata.loc[item, 'Slide_name']
+        patch_name = self.metadata.loc[item, 'Patch_name']
         patch_path = self.metadata.loc[item, 'Patch_path']
         patch = np.load(patch_path)
 
@@ -33,7 +33,7 @@ class UVDataset(Dataset):
 
             return patch, label
         else:
-            return slide_name, patch
+            return patch_name, patch
 
     def __len__(self):
         return len(self.metadata)

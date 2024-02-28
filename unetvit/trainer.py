@@ -95,7 +95,7 @@ class UVTrainer:
             return loss, score
 
     @staticmethod
-    def _update(epoch, current, best, monitor, model, model_save_dir, patience):
+    def _update(epoch, current, best, monitor, model, model_save_dir, patience, risk=None):
         sota_updated = False
         if monitor == 'loss' and current < best:
             sota_updated = True
@@ -106,7 +106,8 @@ class UVTrainer:
             print(f'Sota updated on epoch {epoch}, best {monitor} {best:.5f} -> {current:.5f}')
             best = current
             best_weights = deepcopy(model.state_dict())
-            torch.save(best_weights, str(model_save_dir)+f'_epoch_{epoch:02}.pth')
+            best_name = f'risk_{risk}_epoch_{epoch:02}.pth'
+            torch.save(best_weights, str(model_save_dir / best_name))
             patience = 0
         else:
             patience += 1
@@ -117,13 +118,9 @@ class UVTrainer:
         risk = self.risk
         config = self.config
         device = config['device']
-        valid_indices = self.get_valid_indices()
-
-        if risk is not None:
-            model_save_dir = config['model_save_dir'] / f'risk_{risk}'
-        else:
-            model_save_dir = config['model_save_dir'] / 'all'
+        model_save_dir = config['model_save_dir']
         model_save_dir.mkdir(parents=True, exist_ok=True)
+        valid_indices = self.get_valid_indices()
 
         train_dataset = UVDataset(mode='train',
                                   risk=risk,

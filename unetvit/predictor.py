@@ -38,8 +38,8 @@ class UVPredictor:
         model.load_state_dict(best_weights)
         model.to(device)
 
-        slide_name_list, pred_list = [], []
-        for slide_names, patches in tqdm(test_loader, total=len(test_loader), desc='Attention-Based MIL UNet + ViT | Prediction'):
+        patch_name_list, pred_list = [], []
+        for patch_names, patches in tqdm(test_loader, total=len(test_loader), desc='Attention-Based MIL UNet + ViT | Prediction'):
             patches.to(device)
 
             with torch.no_grad():
@@ -47,7 +47,7 @@ class UVPredictor:
 
             preds = torch.sigmoid(torch.cat(outputs.detach().cpu(), dim=0)).numpy()
             pred_list.extend(preds)
-            slide_name_list.extend(slide_names)
+            patch_name_list.extend(patch_names)
 
-        pred_df = pd.DataFrame({'Slide_name': slide_name_list, 'Risk': risk, 'Proba': pred_list})
+        pred_df = pd.DataFrame({'Patch_name': patch_name_list, 'Risk': risk, 'Proba': pred_list})
         pred_df.to_csv(str(prediction_save_dir)+'.csv', index=False)

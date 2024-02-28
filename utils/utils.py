@@ -6,7 +6,7 @@ from albumentations.pytorch.transforms import ToTensorV2
 from pathlib import Path
 import pickle
 from tqdm import tqdm
-from config import training_config
+from utils.config import training_config
 
 
 def get_patch_metadata(mode, risk=None, save=False):
