@@ -7,7 +7,7 @@ This repository contains the final submission of team "달려달려" in the **Me
 - **Objective**: Prediction of melanoma recurrence using whole slide image and tabular information
 - **Result**: Reached top 5 private score out of 62 teams, advanced to the final presentation stage but failed to win awards
 - **Reproduction**: Clone this repository and execute `main.py`
-- **[PPT](https://1drv.ms/b/s!AsCGiwhl8mgznYFQe2yFCCkXjXlwAw?e=OzGmiG)**
+- **Presentation: [Here](https://1drv.ms/b/s!AsCGiwhl8mgznYFQe2yFCCkXjXlwAw?e=OzGmiG)**
 
 cf. The datasets used cannot be publicly available due to the regulations.
 
@@ -69,3 +69,7 @@ Vault
     └── test_dataset.csv
 
 ```
+
+### Logs and References
+- [Notion Workspace](https://www.notion.so/7b1514b752be49fab6b7390126c70565)
+- [more?](https://dgist.edwith.org/medical-20200327/joinLectures/30437)

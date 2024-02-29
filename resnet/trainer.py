@@ -71,7 +71,7 @@ class RNTrainer:
         performance = {
             'loss': criterion(pred_list, label_list).item(),
         }
-        pred_list = pred_list.cpu().numpy()
+        pred_list = (pred_list > 0.5).float().cpu().numpy()
         label_list = label_list.cpu().numpy()
         performance['acc'] = accuracy_score(y_true=pred_list, y_pred=label_list),
         performance['auroc'] = roc_auc_score(y_true=pred_list, y_score=label_list),
