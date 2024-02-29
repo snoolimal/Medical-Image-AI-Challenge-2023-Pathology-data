@@ -70,10 +70,12 @@ class RNTrainer:
     def _get_performance(criterion, pred_list, label_list, running_performance):
         performance = {
             'loss': criterion(pred_list, label_list).item(),
-            'acc': accuracy_score(y_true=pred_list, y_pred=label_list),
-            'auroc': roc_auc_score(y_true=pred_list, y_score=label_list),
-            'aurpc': average_precision_score(y_true=pred_list, y_score=label_list)
         }
+        pred_list = pred_list.cpu().numpy()
+        label_list = label_list.cpu().numpy()
+        performance['acc'] = accuracy_score(y_true=pred_list, y_pred=label_list),
+        performance['auroc'] = roc_auc_score(y_true=pred_list, y_score=label_list),
+        performance['auprc'] = average_precision_score(y_true=pred_list, y_score=label_list)
 
         for i, value in enumerate(performance.values()):
             running_performance[i] += value
