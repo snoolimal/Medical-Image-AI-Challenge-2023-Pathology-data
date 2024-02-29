@@ -1,13 +1,15 @@
-## Medical Image AI Challenge 2023: Pathology data | 병리영상과 임상정보를 활용한 흑색종 재발 예측
+## Medical Image AI Challenge 2023: Pathology data
 
 This repository contains the final submission of team "달려달려" in the **Medical Image AI Challenge 2023: Pathology data** hosted by Seoul National University Hospital.
 
 - **Competition**: [Medical Image AI Challenge 2023: Pathology data](https://maic.or.kr/competitions/28/infomation) 
-- **Host**: Seoul national University Hospital
+- **Host**: Seoul National University Hospital
 - **Objective**: Prediction of melanoma recurrence using whole slide image and tabular information
 - **Result**: Reached top 5 private score out of 62 teams, advanced to the final presentation stage but failed to win awards
 - **Reproduction**: Clone this repository and execute `main.py`
 - **[PPT](https://1drv.ms/b/s!AsCGiwhl8mgznYFQe2yFCCkXjXlwAw?e=OzGmiG)**
+
+cf. The datasets used cannot be publicly available due to the regulations.
 
 ### File Tree
 ```

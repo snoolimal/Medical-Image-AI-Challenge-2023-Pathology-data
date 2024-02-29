@@ -58,13 +58,11 @@ class RNTrainer:
         for patches, labels in pbar:
             pbar.set_description('ResNet101 MIL | Validation')
 
-            patches = patches.to(device)
+            patches, labels = patches.to(device), labels.to(device)
 
             with torch.no_grad():
                 outputs = model(patches).squeeze()
-                batch_pred = (outputs > 0.5)
-
-                running_performance = RNTrainer._get_performance(criterion, batch_pred, labels, running_performance)
+                running_performance = RNTrainer._get_performance(criterion, outputs, labels, running_performance)
 
         return running_performance
 
