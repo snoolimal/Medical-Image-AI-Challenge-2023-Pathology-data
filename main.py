@@ -5,9 +5,12 @@ from resnet.trainer import RNTrainer
 from resnet.predictor import RNPredictor
 from unetvit.trainer import UVTrainer
 from unetvit.predictor import UVPredictor
+from utils.utils import seed_everything
 
 
 def main(preprocessing=False):
+    seed_everything()
+
     if preprocessing:
         bg_remover = BGRemover()
         bg_remover.remove_background('train')

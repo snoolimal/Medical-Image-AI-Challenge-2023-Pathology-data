@@ -1,12 +1,25 @@
+import os
 import numpy as np
 import pandas as pd
+import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 from pathlib import Path
+import random
 import pickle
 from tqdm import tqdm
-from utils.config import training_config
+from utils.config import SEED, training_config
+
+
+def seed_everything(seed: int = SEED):
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)  # type: ignore
+    torch.backends.cudnn.deterministic = True  # type: ignore
+    torch.backends.cudnn.benchmark = True  # type: ignore
 
 
 def get_patch_metadata(mode, risk=None, save=False):

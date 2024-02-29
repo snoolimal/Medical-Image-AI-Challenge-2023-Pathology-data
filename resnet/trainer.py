@@ -62,10 +62,9 @@ class RNTrainer:
 
             with torch.no_grad():
                 outputs = model(patches).squeeze()
-                batch_pred = (outputs > 0.5).cpu().numpy()
-                batch_label = labels.float().numpy()
+                batch_pred = (outputs > 0.5)
 
-                running_performance = RNTrainer._get_performance(criterion, batch_pred, batch_label, running_performance)
+                running_performance = RNTrainer._get_performance(criterion, batch_pred, labels, running_performance)
 
         return running_performance
 
@@ -78,8 +77,8 @@ class RNTrainer:
             'aurpc': average_precision_score(y_true=pred_list, y_score=label_list)
         }
 
-        for i, performance in enumerate(performance.values()):
-            running_performance[i] += performance
+        for i, value in enumerate(performance.values()):
+            running_performance[i] += value
 
         return running_performance
 
