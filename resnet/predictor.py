@@ -5,6 +5,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from resnet.dataset import RNDataset
 from resnet.model import ResNet
+from utils.utils import get_patch_metadata
 from utils.config import prediction_config
 
 
@@ -28,8 +29,9 @@ class RNPredictor:
         best_weights = [w for w in model_save_dir.glob('*.pth')][-1]
         prediction_save_dir.mkdir(parents=True, exist_ok=True)
 
-        test_dataset = RNDataset(risk=risk,
-                                 mode='test')
+        test_df = get_patch_metadata('test', risk)
+
+        test_dataset = RNDataset(metadata=test_df)
         test_loader = DataLoader(test_dataset,
                                  batch_size=config['batch_size'],
                                  shuffle=False)

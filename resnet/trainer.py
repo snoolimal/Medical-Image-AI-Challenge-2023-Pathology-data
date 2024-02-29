@@ -18,12 +18,15 @@ class RNTrainer:
         self.risk = risk
         self.config = config
 
-    def get_valid_indices(self):
+    def split_dataset(self):
         metadata = get_patch_metadata('train', self.risk)
         valid_size = self.config['valid_size']
-        _, valid_df = train_test_split(metadata, test_size=valid_size, stratify=metadata['Recurrence'], random_state=SEED)
+        train_df, valid_df = train_test_split(metadata, test_size=valid_size, stratify=metadata['Recurrence'], random_state=SEED)
 
-        return valid_df.index
+        train_df.reset_index(drop=True, inplace=True)
+        valid_df.reset_index(drop=True, inplace=True)
+
+        return train_df, valid_df
 
     @staticmethod
     def _train(train_loader, model, criterion, optimizer, device):
@@ -118,15 +121,12 @@ class RNTrainer:
         num_channels = config['num_channels'][risk]
         model_save_dir = config['model_save_dir']
         model_save_dir.mkdir(parents=True, exist_ok=True)
-        valid_indices = self.get_valid_indices()
 
-        train_dataset = RNDataset(risk=risk,
-                                  mode='train',
-                                  valid_indices=valid_indices,
+        train_df, valid_df = self.split_dataset()
+
+        train_dataset = RNDataset(metadata=train_df,
                                   augmentations=augmentations)
-        valid_dataset = RNDataset(risk=risk,
-                                  mode='test',
-                                  valid_indices=valid_indices)
+        valid_dataset = RNDataset(metadata=valid_df)
         train_loader = DataLoader(train_dataset,
                                   batch_size=config['batch_size'],
                                   shuffle=True)
