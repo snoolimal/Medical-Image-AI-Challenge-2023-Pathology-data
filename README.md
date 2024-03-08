@@ -1,6 +1,7 @@
 ## Medical Image AI Challenge 2023: Pathology data
 
-This repository contains the final submission of team "달려달려" in the **Medical Image AI Challenge 2023: Pathology data** hosted by Seoul National University Hospital.
+This repository contains the final submission of team "달려달려" in the **Medical Image AI Challenge 2023: Pathology data** hosted by Seoul National University Hospital. <br>
+All results in this repository are coded by [soonoolimal](https://github.com/snoolimal) and [jjunstone7](https://github.com/jjunstone7).
 
 - **Competition**: [Medical Image AI Challenge 2023: Pathology data](https://maic.or.kr/competitions/28/infomation) 
 - **Host**: Seoul National University Hospital
